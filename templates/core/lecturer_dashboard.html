@@ -1,0 +1,528 @@
+{% extends 'base.html' %}
+
+{% block title %}Lecturer Dashboard - Student Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="p-3">
+                <h6 class="text-muted mb-3">LECTURER PANEL</h6>
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#overview" data-bs-toggle="tab">
+                            <i class="fas fa-tachometer-alt me-2"></i>Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#courses" data-bs-toggle="tab">
+                            <i class="fas fa-book me-2"></i>My Courses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#results" data-bs-toggle="tab">
+                            <i class="fas fa-upload me-2"></i>Upload Results
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#feedback" data-bs-toggle="tab">
+                            <i class="fas fa-comments me-2"></i>Feedback
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <div class="p-4">
+                <div class="tab-content">
+                    <!-- Overview Tab -->
+                    <div class="tab-pane fade show active" id="overview">
+                        <h2 class="mb-4">Welcome, {{ user.get_full_name|default:user.username }}</h2>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h4>{{ total_courses }}</h4>
+                                                <p class="mb-0">My Courses</p>
+                                            </div>
+                                            <i class="fas fa-book fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h4>{{ total_students }}</h4>
+                                                <p class="mb-0">Students</p>
+                                            </div>
+                                            <i class="fas fa-user-graduate fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h4>{{ total_feedback }}</h4>
+                                                <p class="mb-0">Feedback</p>
+                                            </div>
+                                            <i class="fas fa-comments fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h4>{{ average_rating|floatformat:1 }}</h4>
+                                                <p class="mb-0">Avg Rating</p>
+                                            </div>
+                                            <i class="fas fa-star fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Recent Feedback</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        {% for feedback in recent_feedback %}
+                                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                                            <div>
+                                                <h6 class="mb-1">{{ feedback.course.code }}</h6>
+                                                <p class="text-muted mb-1 small">{{ feedback.comment|truncatewords:15 }}</p>
+                                                <small class="text-muted">{{ feedback.created_at|timesince }} ago</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="rating-stars mb-1">
+                                                    {% for i in "12345" %}
+                                                        <i class="fas fa-star {% if forloop.counter <= feedback.rating %}text-warning{% else %}text-muted{% endif %} small"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                <span class="badge bg-{% if feedback.sentiment == 'positive' %}success{% elif feedback.sentiment == 'negative' %}danger{% else %}secondary{% endif %} small">
+                                                    {{ feedback.get_sentiment_display }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <p class="text-muted text-center">No feedback yet</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Quick Actions</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <a href="{% url 'upload_results' %}" class="btn btn-primary">
+                                                <i class="fas fa-upload me-2"></i>Upload Results
+                                            </a>
+                                            <a href="{% url 'feedback_management' %}" class="btn btn-success">
+                                                <i class="fas fa-comments me-2"></i>View All Feedback
+                                            </a>
+                                            <a href="{% url 'feedback_analytics' %}" class="btn btn-info">
+                                                <i class="fas fa-chart-bar me-2"></i>Feedback Analytics
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Feedback Summary</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Positive</span>
+                                            <span class="badge bg-success">{{ positive_feedback }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Neutral</span>
+                                            <span class="badge bg-secondary">{{ neutral_feedback }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Negative</span>
+                                            <span class="badge bg-danger">{{ negative_feedback }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Courses Tab -->
+                    <div class="tab-pane fade" id="courses">
+                        <h2 class="mb-4">My Courses</h2>
+                        
+                        <div class="row">
+                            {% for course in courses %}
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <h5 class="card-title">{{ course.code }}</h5>
+                                                <p class="card-text text-muted">{{ course.title }}</p>
+                                            </div>
+                                            <span class="badge bg-primary">{{ course.unit }} Units</span>
+                                        </div>
+                                        
+                                        <div class="row text-center mb-3">
+                                            <div class="col-4">
+                                                <div class="border-end">
+                                                    <h6 class="text-primary">{{ course.student_count }}</h6>
+                                                    <small class="text-muted">Students</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="border-end">
+                                                    <h6 class="text-success">{{ course.feedback_count }}</h6>
+                                                    <small class="text-muted">Feedback</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <h6 class="text-warning">{{ course.avg_rating|floatformat:1 }}</h6>
+                                                <small class="text-muted">Rating</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-sm btn-outline-primary" onclick="viewCourseStudents('{{ course.id }}', '{{ course.code }}')">
+                                                <i class="fas fa-users me-1"></i>View Students
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12">
+                                <div class="text-center py-5">
+                                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No courses assigned</h5>
+                                    <p class="text-muted">Contact the administrator to get courses assigned to you.</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Results Tab -->
+                    <div class="tab-pane fade" id="results">
+                        <h2 class="mb-4">Upload Results</h2>
+                        
+                        <div class="row">
+                            <!-- Manual Upload -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-edit me-2"></i>Manual Upload
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form method="post" action="{% url 'upload_results' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="upload_type" value="manual">
+                                            
+                                            <div class="mb-3">
+                                                <label for="course_manual" class="form-label">Course</label>
+                                                <select class="form-select" id="course_manual" name="course" required>
+                                                    <option value="">Select Course</option>
+                                                    {% for course in courses %}
+                                                    <option value="{{ course.id }}">
+                                                        {{ course.code }} - {{ course.title }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="student_manual" class="form-label">Student</label>
+                                                <select class="form-select" id="student_manual" name="student" required>
+                                                    <option value="">Select Student</option>
+                                                    {% for student in students %}
+                                                    <option value="{{ student.id }}">
+                                                        {{ student.get_full_name|default:student.username }} ({{ student.username }})
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="session_manual" class="form-label">Session</label>
+                                                    <input type="text" class="form-control" id="session_manual" name="session" 
+                                                           placeholder="e.g., 2023/2024" required>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="semester_manual" class="form-label">Semester</label>
+                                                    <select class="form-select" id="semester_manual" name="semester" required>
+                                                        <option value="">Select Semester</option>
+                                                        <option value="1">First Semester</option>
+                                                        <option value="2">Second Semester</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="score_manual" class="form-label">Score</label>
+                                                <input type="number" class="form-control" id="score_manual" name="score" 
+                                                       min="0" max="100" step="0.01" required>
+                                            </div>
+                                            
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-2"></i>Upload Result
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CSV Upload -->
+                            <div class="col-md-6 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-file-csv me-2"></i>CSV Bulk Upload
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form method="post" action="{% url 'upload_results' %}" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="upload_type" value="csv">
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="csv_session" class="form-label">Session</label>
+                                                    <input type="text" class="form-control" id="csv_session" name="csv_session" 
+                                                           placeholder="e.g., 2023/2024" required>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="csv_semester" class="form-label">Semester</label>
+                                                    <select class="form-select" id="csv_semester" name="csv_semester" required>
+                                                        <option value="">Select Semester</option>
+                                                        <option value="1">First Semester</option>
+                                                        <option value="2">Second Semester</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="csv_file" class="form-label">CSV File</label>
+                                                <input type="file" class="form-control" id="csv_file" name="csv_file" 
+                                                       accept=".csv" required>
+                                            </div>
+                                            
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="fas fa-upload me-2"></i>Upload CSV
+                                            </button>
+                                        </form>
+                                        
+                                        <hr>
+                                        
+                                        <div class="alert alert-info">
+                                            <h6><i class="fas fa-info-circle me-2"></i>CSV Format</h6>
+                                            <p class="mb-2">Required columns:</p>
+                                            <ul class="mb-0">
+                                                <li><strong>student_username</strong></li>
+                                                <li><strong>course_code</strong></li>
+                                                <li><strong>score</strong></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Tab -->
+                    <div class="tab-pane fade" id="feedback">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2>My Course Feedback</h2>
+                            <a href="{% url 'feedback_analytics' %}" class="btn btn-success">
+                                <i class="fas fa-chart-bar me-2"></i>Detailed Analytics
+                            </a>
+                        </div>
+
+                        <!-- Feedback Summary Cards -->
+                        <div class="row mb-4">
+                            {% for summary in feedback_summaries %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <h6 class="card-title">{{ summary.course.code }}</h6>
+                                                <p class="text-muted small mb-0">{{ summary.session }}/{{ summary.get_semester_display }}</p>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="rating-stars mb-1">
+                                                    {% for i in "12345" %}
+                                                        <i class="fas fa-star {% if forloop.counter <= summary.average_rating %}text-warning{% else %}text-muted{% endif %} small"></i>
+                                                    {% endfor %}
+                                                </div>
+                                                <span class="badge bg-primary">{{ summary.average_rating }}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row text-center">
+                                            <div class="col-4">
+                                                <div class="border-end">
+                                                    <h6 class="text-primary">{{ summary.total_feedback }}</h6>
+                                                    <small class="text-muted">Total</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="border-end">
+                                                    <h6 class="text-success">{{ summary.positive_count }}</h6>
+                                                    <small class="text-muted">Positive</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <h6 class="text-danger">{{ summary.negative_count }}</h6>
+                                                <small class="text-muted">Negative</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="col-12">
+                                <div class="text-center py-4">
+                                    <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No feedback summaries available</h5>
+                                    <p class="text-muted">Feedback summaries will appear once students submit feedback.</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Course Students Modal -->
+<div class="modal fade" id="courseStudentsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="courseStudentsModalTitle">Course Students</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="courseStudentsContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function viewCourseStudents(courseId, courseCode) {
+    document.getElementById('courseStudentsModalTitle').textContent = `Students in ${courseCode}`;
+    
+    // Show loading spinner
+    document.getElementById('courseStudentsContent').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    // Show modal
+    new bootstrap.Modal(document.getElementById('courseStudentsModal')).show();
+    
+    // Fetch students
+    fetch(`{% url 'get_course_students' %}?course_id=${courseId}`)
+        .then(response => response.json())
+        .then(data => {
+            let content = '';
+            if (data.students.length > 0) {
+                content = `
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                    <th>Student ID</th>
+                                    <th>Results</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                data.students.forEach(student => {
+                    content += `
+                        <tr>
+                            <td>${student.name}</td>
+                            <td>${student.username}</td>
+                            <td>${student.student_id || '-'}</td>
+                            <td>${student.result_count} results</td>
+                        </tr>
+                    `;
+                });
+                
+                content += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                content = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-user-graduate fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No students found</h5>
+                        <p class="text-muted">No students have results for this course yet.</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('courseStudentsContent').innerHTML = content;
+        })
+        .catch(error => {
+            document.getElementById('courseStudentsContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error loading students. Please try again.
+                </div>
+            `;
+        });
+}
+</script>
+{% endblock %}
