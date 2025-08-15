@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - DB_NAME=student_management
+      - DB_USER=postgres
+      - DB_PASSWORD=your_password
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=student_management
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=your_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+  postgres_data:
