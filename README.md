@@ -75,29 +75,7 @@ A comprehensive Django web application for managing student results, course feed
     └── create_demo_data.py      # Demo data creation
 \`\`\`
 
-## 👥 User Roles & Permissions
 
-### Admin
-- **User Management**: Create, view, edit, and delete users (students, lecturers, admins)
-- **Department Management**: Manage academic departments
-- **Course Management**: Create and assign courses to departments and lecturers
-- **Results Management**: View and manage all student results
-- **Feedback Management**: View all course feedback and analytics
-- **System Overview**: Access to system-wide statistics and reports
-
-### Lecturer
-- **Course Management**: View assigned courses and enrolled students
-- **Results Upload**: Upload student results (manual form or CSV bulk import)
-- **Feedback Analytics**: View course feedback with sentiment analysis
-- **Performance Tracking**: Monitor course performance and student progress
-
-### Student
-- **Results Viewing**: Access personal academic results by semester
-- **GPA/CGPA Tracking**: View calculated grade point averages
-- **Feedback Submission**: Submit anonymous course and lecturer feedback
-- **Transcript Generation**: View and download academic transcripts
-
-## 🗄️ Django Models
 
 ### User Model (Extended)
 ```python
