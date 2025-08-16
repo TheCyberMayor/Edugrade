@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Results Management - Student Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Results Management</h2>
+        <div>
+            <a href="{% url 'upload_results' %}" class="btn btn-primary me-2">
+                <i class="fas fa-upload me-2"></i>Upload Results
+            </a>
+            <a href="{% url 'gpa_calculator' %}" class="btn btn-success">
+                <i class="fas fa-calculator me-2"></i>GPA Calculator
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="session" class="form-label">Session</label>
+                    <select class="form-select" id="session" name="session">
+                        <option value="">All Sessions</option>
+                        {% for session in sessions %}
+                        <option value="{{ session }}" {% if session == current_session %}selected{% endif %}>
+                            {{ session }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label for="semester" class="form-label">Semester</label>
+                    <select class="form-select" id="semester" name="semester">
+                        <option value="">All Semesters</option>
+                        <option value="1" {% if current_semester == '1' %}selected{% endif %}>First</option>
+                        <option value="2" {% if current_semester == '2' %}selected{% endif %}>Second</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="course" class="form-label">Course</label>
+                    <select class="form-select" id="course" name="course">
+                        <option value="">All Courses</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}" {% if course.id|stringformat:"s" == current_course %}selected{% endif %}>
+                            {{ course.code }} - {{ course.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="student" class="form-label">Student</label>
+                    <select class="form-select" id="student" name="student">
+                        <option value="">All Students</option>
+                        {% for student in students %}
+                        <option value="{{ student.id }}" {% if student.id|stringformat:"s" == current_student %}selected{% endif %}>
+                            {{ student.get_full_name|default:student.username }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-outline-primary d-block">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Student Results</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Score</th>
+                            <th>Grade</th>
+                            <th>Session</th>
+                            <th>Semester</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>{{ result.student.get_full_name|default:result.student.username }}</strong>
+                                    <br><small class="text-muted">{{ result.student.username }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ result.course.code }}</strong>
+                                    <br><small class="text-muted">{{ result.course.title }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if result.score >= 70 %}success{% elif result.score >= 60 %}primary{% elif result.score >= 50 %}warning{% else %}danger{% endif %} fs-6">
+                                    {{ result.score }}%
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if result.grade == 'A' %}success{% elif result.grade == 'B' %}primary{% elif result.grade == 'C' %}warning{% elif result.grade == 'D' %}secondary{% else %}danger{% endif %} fs-6">
+                                    {{ result.grade }}
+                                </span>
+                            </td>
+                            <td>{{ result.session }}</td>
+                            <td>{{ result.get_semester_display }}</td>
+                            <td>
+                                <form method="post" action="{% url 'delete_result' result.id %}" class="d-inline" 
+                                      onsubmit="return confirm('Are you sure you want to delete this result?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No results found</h5>
+                                <p class="text-muted">Upload some results to get started.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

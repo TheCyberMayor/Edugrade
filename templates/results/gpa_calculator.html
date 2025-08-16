@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}GPA Calculator - Student Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>GPA Calculator</h2>
+        <a href="{% url 'results_management' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Results
+        </a>
+    </div>
+
+    <!-- Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="student" class="form-label">Filter by Student</label>
+                    <select class="form-select" id="student" name="student">
+                        <option value="">All Students</option>
+                        {% for student in students %}
+                        <option value="{{ student.id }}" {% if student.id|stringformat:"s" == current_student %}selected{% endif %}>
+                            {{ student.get_full_name|default:student.username }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-filter me-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- GPA Calculations -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">GPA Calculations</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student</th>
+                            <th>Session</th>
+                            <th>Semester</th>
+                            <th>GPA</th>
+                            <th>CGPA</th>
+                            <th>Total Units</th>
+                            <th>Total Points</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for gpa in gpa_calculations %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>{{ gpa.student.get_full_name|default:gpa.student.username }}</strong>
+                                    <br><small class="text-muted">{{ gpa.student.username }}</small>
+                                </div>
+                            </td>
+                            <td>{{ gpa.session }}</td>
+                            <td>{{ gpa.get_semester_display }}</td>
+                            <td>
+                                <span class="badge bg-{% if gpa.gpa >= 3.5 %}success{% elif gpa.gpa >= 2.5 %}primary{% elif gpa.gpa >= 1.5 %}warning{% else %}danger{% endif %} fs-6">
+                                    {{ gpa.gpa|floatformat:2 }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if gpa.cgpa >= 3.5 %}success{% elif gpa.cgpa >= 2.5 %}primary{% elif gpa.cgpa >= 1.5 %}warning{% else %}danger{% endif %} fs-6">
+                                    {{ gpa.cgpa|floatformat:2 }}
+                                </span>
+                            </td>
+                            <td>{{ gpa.total_units }}</td>
+                            <td>{{ gpa.total_points|floatformat:2 }}</td>
+                            <td>{{ gpa.calculated_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <form method="post" action="{% url 'recalculate_gpa' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="student_id" value="{{ gpa.student.id }}">
+                                    <input type="hidden" name="session" value="{{ gpa.session }}">
+                                    <input type="hidden" name="semester" value="{{ gpa.semester }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary" 
+                                            title="Recalculate GPA">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <i class="fas fa-calculator fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No GPA calculations found</h5>
+                                <p class="text-muted">GPA will be calculated automatically when results are uploaded.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- GPA Scale Reference -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Grade Scale</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>A (70-100)</span>
+                                <span class="badge bg-success">4.0</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>B (60-69)</span>
+                                <span class="badge bg-primary">3.0</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>C (50-59)</span>
+                                <span class="badge bg-warning">2.0</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex justify-content-between">
+                                <span>D (45-49)</span>
+                                <span class="badge bg-secondary">1.0</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>F (0-44)</span>
+                                <span class="badge bg-danger">0.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">GPA Classification</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>First Class</span>
+                        <span class="badge bg-success">3.50 - 4.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Second Class Upper</span>
+                        <span class="badge bg-primary">2.50 - 3.49</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Second Class Lower</span>
+                        <span class="badge bg-warning">1.50 - 2.49</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Third Class</span>
+                        <span class="badge bg-danger">1.00 - 1.49</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

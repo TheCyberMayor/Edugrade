@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Results - Student Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Upload Results</h2>
+        <a href="{% url 'results_management' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Results
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Manual Upload -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Manual Upload
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="upload_type" value="manual">
+                        
+                        <div class="mb-3">
+                            <label for="student" class="form-label">Student</label>
+                            <select class="form-select" id="student" name="student" required>
+                                <option value="">Select Student</option>
+                                {% for student in students %}
+                                <option value="{{ student.id }}">
+                                    {{ student.get_full_name|default:student.username }} ({{ student.username }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="course" class="form-label">Course</label>
+                            <select class="form-select" id="course" name="course" required>
+                                <option value="">Select Course</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">
+                                    {{ course.code }} - {{ course.title }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="session" class="form-label">Session</label>
+                                <input type="text" class="form-control" id="session" name="session" 
+                                       placeholder="e.g., 2023/2024" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="semester" class="form-label">Semester</label>
+                                <select class="form-select" id="semester" name="semester" required>
+                                    <option value="">Select Semester</option>
+                                    <option value="1">First Semester</option>
+                                    <option value="2">Second Semester</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="score" class="form-label">Score</label>
+                            <input type="number" class="form-control" id="score" name="score" 
+                                   min="0" max="100" step="0.01" required>
+                            <div class="form-text">Enter score between 0 and 100</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Upload Result
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- CSV Upload -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-csv me-2"></i>CSV Bulk Upload
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="upload_type" value="csv">
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="csv_session" class="form-label">Session</label>
+                                <input type="text" class="form-control" id="csv_session" name="csv_session" 
+                                       placeholder="e.g., 2023/2024" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="csv_semester" class="form-label">Semester</label>
+                                <select class="form-select" id="csv_semester" name="csv_semester" required>
+                                    <option value="">Select Semester</option>
+                                    <option value="1">First Semester</option>
+                                    <option value="2">Second Semester</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="csv_file" class="form-label">CSV File</label>
+                            <input type="file" class="form-control" id="csv_file" name="csv_file" 
+                                   accept=".csv" required>
+                            <div class="form-text">Upload a CSV file with student results</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-upload me-2"></i>Upload CSV
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>CSV Format</h6>
+                        <p class="mb-2">Your CSV file should have the following columns:</p>
+                        <ul class="mb-2">
+                            <li><strong>student_username</strong> - Student's username</li>
+                            <li><strong>course_code</strong> - Course code (e.g., CS101)</li>
+                            <li><strong>score</strong> - Score between 0 and 100</li>
+                        </ul>
+                        <small class="text-muted">
+                            Example: student1,CS101,85.5
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

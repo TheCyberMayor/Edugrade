@@ -1,0 +1,652 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - Student Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="p-3">
+                <h6 class="text-muted mb-3">STUDENT PANEL</h6>
+                <ul class="nav nav-pills flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#overview" data-bs-toggle="tab">
+                            <i class="fas fa-tachometer-alt me-2"></i>Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#results" data-bs-toggle="tab">
+                            <i class="fas fa-chart-line me-2"></i>My Results
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#transcript" data-bs-toggle="tab">
+                            <i class="fas fa-file-alt me-2"></i>Transcript
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#feedback" data-bs-toggle="tab">
+                            <i class="fas fa-comment-alt me-2"></i>Give Feedback
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <div class="p-4">
+                <div class="tab-content">
+                    <!-- Overview Tab -->
+                    <div class="tab-pane fade show active" id="overview">
+                        <h2 class="mb-4">Welcome, {{ user.get_full_name|default:user.username }}</h2>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h4>{{ total_courses }}</h4>
+                                                <p class="mb-0">Courses Taken</p>
+                                            </div>
+                                            <i class="fas fa-book fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h4>{{ current_cgpa|floatformat:2 }}</h4>
+                                                <p class="mb-0">Current CGPA</p>
+                                            </div>
+                                            <i class="fas fa-star fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h4>{{ total_units }}</h4>
+                                                <p class="mb-0">Total Units</p>
+                                            </div>
+                                            <i class="fas fa-calculator fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-warning text-white">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h4>{{ feedback_given }}</h4>
+                                                <p class="mb-0">Feedback Given</p>
+                                            </div>
+                                            <i class="fas fa-comments fa-2x opacity-75"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Academic Progress</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if semester_gpas %}
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Session</th>
+                                                        <th>Semester</th>
+                                                        <th>GPA</th>
+                                                        <th>CGPA</th>
+                                                        <th>Units</th>
+                                                        <th>Classification</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for gpa in semester_gpas %}
+                                                    <tr>
+                                                        <td>{{ gpa.session }}</td>
+                                                        <td>{{ gpa.get_semester_display }}</td>
+                                                        <td>
+                                                            <span class="badge bg-{% if gpa.gpa >= 3.5 %}success{% elif gpa.gpa >= 2.5 %}primary{% elif gpa.gpa >= 1.5 %}warning{% else %}danger{% endif %}">
+                                                                {{ gpa.gpa|floatformat:2 }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-{% if gpa.cgpa >= 3.5 %}success{% elif gpa.cgpa >= 2.5 %}primary{% elif gpa.cgpa >= 1.5 %}warning{% else %}danger{% endif %}">
+                                                                {{ gpa.cgpa|floatformat:2 }}
+                                                            </span>
+                                                        </td>
+                                                        <td>{{ gpa.total_units }}</td>
+                                                        <td>
+                                                            <small class="text-muted">
+                                                                {% if gpa.cgpa >= 3.5 %}First Class
+                                                                {% elif gpa.cgpa >= 2.5 %}Second Class Upper
+                                                                {% elif gpa.cgpa >= 1.5 %}Second Class Lower
+                                                                {% elif gpa.cgpa >= 1.0 %}Third Class
+                                                                {% else %}Pass{% endif %}
+                                                            </small>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {% else %}
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                            <h5 class="text-muted">No academic records yet</h5>
+                                            <p class="text-muted">Your academic progress will appear here once results are uploaded.</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Quick Actions</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <a href="{% url 'feedback_submission' %}" class="btn btn-primary">
+                                                <i class="fas fa-comment-alt me-2"></i>Submit Feedback
+                                            </a>
+                                            <button class="btn btn-success" onclick="downloadTranscriptPDF()">
+                                                <i class="fas fa-download me-2"></i>Download Transcript
+                                            </button>
+                                            <button class="btn btn-info" onclick="showGPACalculator()">
+                                                <i class="fas fa-calculator me-2"></i>GPA Calculator
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Current Classification</h6>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        {% if current_cgpa >= 3.5 %}
+                                            <div class="text-success">
+                                                <i class="fas fa-trophy fa-2x mb-2"></i>
+                                                <h5>First Class</h5>
+                                                <p class="text-muted">Excellent Performance</p>
+                                            </div>
+                                        {% elif current_cgpa >= 2.5 %}
+                                            <div class="text-primary">
+                                                <i class="fas fa-medal fa-2x mb-2"></i>
+                                                <h5>Second Class Upper</h5>
+                                                <p class="text-muted">Very Good Performance</p>
+                                            </div>
+                                        {% elif current_cgpa >= 1.5 %}
+                                            <div class="text-warning">
+                                                <i class="fas fa-award fa-2x mb-2"></i>
+                                                <h5>Second Class Lower</h5>
+                                                <p class="text-muted">Good Performance</p>
+                                            </div>
+                                        {% elif current_cgpa >= 1.0 %}
+                                            <div class="text-secondary">
+                                                <i class="fas fa-certificate fa-2x mb-2"></i>
+                                                <h5>Third Class</h5>
+                                                <p class="text-muted">Satisfactory Performance</p>
+                                            </div>
+                                        {% else %}
+                                            <div class="text-muted">
+                                                <i class="fas fa-graduation-cap fa-2x mb-2"></i>
+                                                <h5>Getting Started</h5>
+                                                <p class="text-muted">Keep working hard!</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Tab -->
+                    <div class="tab-pane fade" id="results">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2>My Results</h2>
+                            <div>
+                                <select class="form-select" id="sessionFilter" onchange="filterResults()">
+                                    <option value="">All Sessions</option>
+                                    {% for session in available_sessions %}
+                                    <option value="{{ session }}">{{ session }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        {% for session, semesters in results_by_session.items %}
+                        <div class="session-results mb-4" data-session="{{ session }}">
+                            <h4 class="mb-3">{{ session }} Academic Session</h4>
+                            
+                            {% for semester, data in semesters.items %}
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">{{ semester }} Semester</h5>
+                                        <div>
+                                            <span class="badge bg-primary me-2">GPA: {{ data.gpa|floatformat:2 }}</span>
+                                            <span class="badge bg-success">CGPA: {{ data.cgpa|floatformat:2 }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Course Code</th>
+                                                    <th>Course Title</th>
+                                                    <th>Units</th>
+                                                    <th>Score</th>
+                                                    <th>Grade</th>
+                                                    <th>Points</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for result in data.results %}
+                                                <tr>
+                                                    <td><strong>{{ result.course.code }}</strong></td>
+                                                    <td>{{ result.course.title }}</td>
+                                                    <td>{{ result.course.unit }}</td>
+                                                    <td>
+                                                        <span class="badge bg-{% if result.score >= 70 %}success{% elif result.score >= 60 %}primary{% elif result.score >= 50 %}warning{% else %}danger{% endif %}">
+                                                            {{ result.score }}%
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-{% if result.grade == 'A' %}success{% elif result.grade == 'B' %}primary{% elif result.grade == 'C' %}warning{% elif result.grade == 'D' %}secondary{% else %}danger{% endif %}">
+                                                            {{ result.grade }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ result.grade_point|floatformat:1 }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                            <tfoot class="table-light">
+                                                <tr>
+                                                    <th colspan="2">Semester Summary</th>
+                                                    <th>{{ data.total_units }} Units</th>
+                                                    <th colspan="2">GPA: {{ data.gpa|floatformat:2 }}</th>
+                                                    <th>{{ data.total_points|floatformat:1 }} Points</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No results available</h5>
+                            <p class="text-muted">Your academic results will appear here once uploaded by your lecturers.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Transcript Tab -->
+                    <div class="tab-pane fade" id="transcript">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2>Academic Transcript</h2>
+                            <button class="btn btn-primary" onclick="downloadTranscriptPDF()">
+                                <i class="fas fa-download me-2"></i>Download PDF
+                            </button>
+                        </div>
+
+                        <div class="card" id="transcriptContent">
+                            <div class="card-body">
+                                <!-- Student Information -->
+                                <div class="text-center mb-4">
+                                    <h3>STUDENT MANAGEMENT SYSTEM</h3>
+                                    <h4>OFFICIAL ACADEMIC TRANSCRIPT</h4>
+                                    <hr>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td><strong>Student Name:</strong></td>
+                                                <td>{{ user.get_full_name|default:user.username }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Student ID:</strong></td>
+                                                <td>{{ user.student_id|default:user.username }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Department:</strong></td>
+                                                <td>{{ user.department.name|default:"Not Assigned" }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td><strong>Current CGPA:</strong></td>
+                                                <td>{{ current_cgpa|floatformat:2 }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Total Units:</strong></td>
+                                                <td>{{ total_units }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Classification:</strong></td>
+                                                <td>
+                                                    {% if current_cgpa >= 3.5 %}First Class
+                                                    {% elif current_cgpa >= 2.5 %}Second Class Upper
+                                                    {% elif current_cgpa >= 1.5 %}Second Class Lower
+                                                    {% elif current_cgpa >= 1.0 %}Third Class
+                                                    {% else %}Pass{% endif %}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Academic Record -->
+                                {% for session, semesters in results_by_session.items %}
+                                <div class="mb-4">
+                                    <h5 class="bg-light p-2">{{ session }} Academic Session</h5>
+                                    
+                                    {% for semester, data in semesters.items %}
+                                    <div class="mb-3">
+                                        <h6>{{ semester }} Semester</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Course Code</th>
+                                                        <th>Course Title</th>
+                                                        <th>Units</th>
+                                                        <th>Grade</th>
+                                                        <th>Points</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for result in data.results %}
+                                                    <tr>
+                                                        <td>{{ result.course.code }}</td>
+                                                        <td>{{ result.course.title }}</td>
+                                                        <td>{{ result.course.unit }}</td>
+                                                        <td>{{ result.grade }}</td>
+                                                        <td>{{ result.grade_point|floatformat:1 }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                                <tfoot class="table-light">
+                                                    <tr>
+                                                        <th colspan="2">Semester Summary</th>
+                                                        <th>{{ data.total_units }}</th>
+                                                        <th>GPA: {{ data.gpa|floatformat:2 }}</th>
+                                                        <th>CGPA: {{ data.cgpa|floatformat:2 }}</th>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+
+                                <!-- Grade Scale -->
+                                <div class="mt-4">
+                                    <h6>Grade Scale</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <table class="table table-sm table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Grade</th>
+                                                        <th>Score Range</th>
+                                                        <th>Points</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr><td>A</td><td>70-100</td><td>4.0</td></tr>
+                                                    <tr><td>B</td><td>60-69</td><td>3.0</td></tr>
+                                                    <tr><td>C</td><td>50-59</td><td>2.0</td></tr>
+                                                    <tr><td>D</td><td>45-49</td><td>1.0</td></tr>
+                                                    <tr><td>F</td><td>0-44</td><td>0.0</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <p><small class="text-muted">Generated on {{ today|date:"F d, Y" }}</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Tab -->
+                    <div class="tab-pane fade" id="feedback">
+                        <h2 class="mb-4">Submit Course Feedback</h2>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="text-muted mb-4">
+                                    Your feedback helps improve the quality of education. All feedback is anonymous and confidential.
+                                </p>
+                                
+                                <div class="text-center">
+                                    <a href="{% url 'feedback_submission' %}" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-comment-alt me-2"></i>Submit Feedback
+                                    </a>
+                                </div>
+                                
+                                {% if recent_feedback %}
+                                <hr>
+                                <h5>Your Recent Feedback</h5>
+                                <div class="row">
+                                    {% for feedback in recent_feedback %}
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="card-title">{{ feedback.course.code }}</h6>
+                                                    <div class="rating-stars">
+                                                        {% for i in "12345" %}
+                                                            <i class="fas fa-star {% if forloop.counter <= feedback.rating %}text-warning{% else %}text-muted{% endif %} small"></i>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                <p class="card-text small">{{ feedback.comment|truncatewords:15 }}</p>
+                                                <small class="text-muted">{{ feedback.created_at|timesince }} ago</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GPA Calculator Modal -->
+<div class="modal fade" id="gpaCalculatorModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">GPA Calculator</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Use this calculator to estimate your GPA for hypothetical grades.
+                </div>
+                
+                <div id="gpaCalculatorContent">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Course</label>
+                            <input type="text" class="form-control" placeholder="Course name">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Units</label>
+                            <input type="number" class="form-control" min="1" max="6" value="3">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Grade</label>
+                            <select class="form-select">
+                                <option value="4">A</option>
+                                <option value="3">B</option>
+                                <option value="2">C</option>
+                                <option value="1">D</option>
+                                <option value="0">F</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-outline-danger d-block">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-3">
+                    <button class="btn btn-outline-primary" onclick="addGPARow()">
+                        <i class="fas fa-plus me-2"></i>Add Course
+                    </button>
+                </div>
+                
+                <div class="alert alert-success">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h5 id="calculatedGPA">0.00</h5>
+                            <small>Estimated GPA</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 id="totalUnits">0</h5>
+                            <small>Total Units</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterResults() {
+    const selectedSession = document.getElementById('sessionFilter').value;
+    const sessionResults = document.querySelectorAll('.session-results');
+    
+    sessionResults.forEach(result => {
+        if (selectedSession === '' || result.dataset.session === selectedSession) {
+            result.style.display = 'block';
+        } else {
+            result.style.display = 'none';
+        }
+    });
+}
+
+function downloadTranscriptPDF() {
+    // Download actual PDF file
+    window.location.href = "{% url 'generate_transcript_pdf' %}";
+}
+
+function generateTranscript() {
+    // Keep the print functionality as backup
+    downloadTranscriptPDF();
+}
+
+function showGPACalculator() {
+    new bootstrap.Modal(document.getElementById('gpaCalculatorModal')).show();
+    calculateGPA();
+}
+
+function addGPARow() {
+    const content = document.getElementById('gpaCalculatorContent');
+    const newRow = document.createElement('div');
+    newRow.className = 'row mb-3';
+    newRow.innerHTML = `
+        <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Course name">
+        </div>
+        <div class="col-md-2">
+            <input type="number" class="form-control course-units" min="1" max="6" value="3" onchange="calculateGPA()">
+        </div>
+        <div class="col-md-2">
+            <select class="form-select course-grade" onchange="calculateGPA()">
+                <option value="4">A</option>
+                <option value="3">B</option>
+                <option value="2">C</option>
+                <option value="1">D</option>
+                <option value="0">F</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-outline-danger d-block" onclick="removeGPARow(this)">Remove</button>
+        </div>
+    `;
+    content.appendChild(newRow);
+}
+
+function removeGPARow(button) {
+    button.closest('.row').remove();
+    calculateGPA();
+}
+
+function calculateGPA() {
+    const units = document.querySelectorAll('.course-units');
+    const grades = document.querySelectorAll('.course-grade');
+    
+    let totalPoints = 0;
+    let totalUnits = 0;
+    
+    for (let i = 0; i < units.length; i++) {
+        const unit = parseInt(units[i].value) || 0;
+        const grade = parseFloat(grades[i].value) || 0;
+        
+        totalPoints += unit * grade;
+        totalUnits += unit;
+    }
+    
+    const gpa = totalUnits > 0 ? (totalPoints / totalUnits) : 0;
+    
+    document.getElementById('calculatedGPA').textContent = gpa.toFixed(2);
+    document.getElementById('totalUnits').textContent = totalUnits;
+}
+
+// Initialize GPA calculator
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners to existing inputs
+    document.querySelectorAll('.course-units, .course-grade').forEach(input => {
+        input.addEventListener('change', calculateGPA);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Feedback Analytics - Student Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Feedback Analytics</h2>
+        <a href="{% url 'feedback_management' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Feedback
+        </a>
+    </div>
+
+    <!-- Overall Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ total_feedback }}</h4>
+                            <p class="mb-0">Total Feedback</p>
+                        </div>
+                        <i class="fas fa-comments fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ average_rating }}</h4>
+                            <p class="mb-0">Average Rating</p>
+                        </div>
+                        <i class="fas fa-star fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ sentiment_totals.positive|default:0 }}</h4>
+                            <p class="mb-0">Positive Feedback</p>
+                        </div>
+                        <i class="fas fa-thumbs-up fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4>{{ sentiment_totals.negative|default:0 }}</h4>
+                            <p class="mb-0">Negative Feedback</p>
+                        </div>
+                        <i class="fas fa-thumbs-down fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="course" class="form-label">Course</label>
+                    <select class="form-select" id="course" name="course">
+                        <option value="">All Courses</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}" {% if course.id|stringformat:"s" == current_filters.course %}selected{% endif %}>
+                            {{ course.code }} - {{ course.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="session" class="form-label">Session</label>
+                    <select class="form-select" id="session" name="session">
+                        <option value="">All Sessions</option>
+                        {% for session in sessions %}
+                        <option value="{{ session }}" {% if session == current_filters.session %}selected{% endif %}>
+                            {{ session }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="semester" class="form-label">Semester</label>
+                    <select class="form-select" id="semester" name="semester">
+                        <option value="">All Semesters</option>
+                        <option value="1" {% if current_filters.semester == '1' %}selected{% endif %}>First</option>
+                        <option value="2" {% if current_filters.semester == '2' %}selected{% endif %}>Second</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-outline-primary d-block">
+                        <i class="fas fa-filter me-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Analytics Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Course Feedback Summary</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Course</th>
+                            <th>Lecturer</th>
+                            <th>Session/Semester</th>
+                            <th>Total Feedback</th>
+                            <th>Average Rating</th>
+                            <th>Sentiment Analysis</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for summary in summaries %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>{{ summary.course.code }}</strong>
+                                    <br><small class="text-muted">{{ summary.course.title }}</small>
+                                </div>
+                            </td>
+                            <td>{{ summary.lecturer.get_full_name|default:summary.lecturer.username }}</td>
+                            <td>{{ summary.session }}/{{ summary.get_semester_display }}</td>
+                            <td>
+                                <span class="badge bg-primary fs-6">{{ summary.total_feedback }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-{% if summary.average_rating >= 4 %}success{% elif summary.average_rating >= 3 %}primary{% elif summary.average_rating >= 2 %}warning{% else %}danger{% endif %} me-2">
+                                        {{ summary.average_rating }}
+                                    </span>
+                                    <div class="rating-stars">
+                                        {% for i in "12345" %}
+                                            <i class="fas fa-star {% if forloop.counter <= summary.average_rating %}text-warning{% else %}text-muted{% endif %} small"></i>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <span class="badge bg-success">+{{ summary.positive_count }}</span>
+                                    <span class="badge bg-secondary">{{ summary.neutral_count }}</span>
+                                    <span class="badge bg-danger">-{{ summary.negative_count }}</span>
+                                </div>
+                            </td>
+                            <td>{{ summary.last_updated|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No analytics data available</h5>
+                                <p class="text-muted">Analytics will appear once feedback is submitted.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

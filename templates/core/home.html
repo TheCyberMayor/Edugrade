@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome - Student Management System{% endblock %}
+
+{% block content %}
+<div class="bg-primary text-white">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Student Management System</h1>
+                <p class="lead mb-4">
+                    A comprehensive platform for managing student results, course feedback, 
+                    and academic records with role-based access for administrators, lecturers, and students.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'login' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="fas fa-graduation-cap" style="font-size: 12rem; opacity: 0.1;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="text-primary mb-3">
+                        <i class="fas fa-user-shield fa-3x"></i>
+                    </div>
+                    <h5 class="card-title">Admin Dashboard</h5>
+                    <p class="card-text">
+                        Manage users, departments, courses, and oversee the entire system 
+                        with comprehensive administrative controls.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="text-success mb-3">
+                        <i class="fas fa-chalkboard-teacher fa-3x"></i>
+                    </div>
+                    <h5 class="card-title">Lecturer Portal</h5>
+                    <p class="card-text">
+                        Upload student results, view course feedback, and manage 
+                        academic records with detailed analytics and reporting.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="text-info mb-3">
+                        <i class="fas fa-user-graduate fa-3x"></i>
+                    </div>
+                    <h5 class="card-title">Student Portal</h5>
+                    <p class="card-text">
+                        View academic results, submit course feedback, and access 
+                        transcripts with GPA calculations and progress tracking.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <h3 class="mb-4">Key Features</h3>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Role-based authentication and access control
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Student result management with GPA/CGPA calculation
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Anonymous course and lecturer feedback system
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Comprehensive reporting and analytics
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        CSV bulk import for efficient data management
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <h3 class="mb-4">Demo Credentials</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Admin</h6>
+                                <p class="card-text small">
+                                    <strong>Username:</strong> admin<br>
+                                    <strong>Password:</strong> admin123
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Lecturer</h6>
+                                <p class="card-text small">
+                                    <strong>Username:</strong> lecturer<br>
+                                    <strong>Password:</strong> lecturer123
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Student</h6>
+                                <p class="card-text small">
+                                    <strong>Username:</strong> student<br>
+                                    <strong>Password:</strong> student123
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
