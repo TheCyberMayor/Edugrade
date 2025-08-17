@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.db.models import Q, Avg, Count
 from django.http import JsonResponse
-from accounts.models import Course
+from core.models import Course
 from results.models import Result
 from .models import Feedback, FeedbackSummary
 
@@ -165,17 +165,17 @@ def feedback_analytics(request):
     
     # Calculate overall statistics
     total_feedback = summaries.aggregate(
-        total=Count('id')
+        total=models.Sum('total_feedback')
     )['total'] or 0
     
     average_rating = summaries.aggregate(
-        avg=Avg('average_rating')
+        avg=models.Avg('average_rating')
     )['avg'] or 0.0
     
     sentiment_totals = summaries.aggregate(
-        positive=Count('id', filter=Q(sentiment='positive')),
-        neutral=Count('id', filter=Q(sentiment='neutral')),
-        negative=Count('id', filter=Q(sentiment='negative'))
+        positive=models.Sum('positive_count'),
+        neutral=models.Sum('neutral_count'),
+        negative=models.Sum('negative_count')
     )
     
     context = {

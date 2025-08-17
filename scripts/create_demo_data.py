@@ -13,7 +13,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'student_management.settings')
 django.setup()
 
 from django.contrib.auth import get_user_model
-from accounts.models import Department, Course
+from core.models import Department, Course
 
 User = get_user_model()
 
