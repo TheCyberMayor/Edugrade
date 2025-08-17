@@ -1,5 +1,11 @@
 import os
-from decouple import config
+from pathlib import Path
+from decouple import Config, RepositoryEnv
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+env_path = BASE_DIR / '.env'
+config = Config(RepositoryEnv(str(env_path))) if env_path.exists() else Config()
+
 from .settings import *
 
 # Production settings for AWS deployment
@@ -13,7 +19,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': config('DB_NAME', default='student_management'),
         'USER': config('DB_USER', default='admin'),
-        'PASSWORD': config('DB_PASSWORD', default=''),
+        'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='3306'),
         'OPTIONS': {
