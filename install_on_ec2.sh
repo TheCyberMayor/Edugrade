@@ -61,19 +61,42 @@ sudo apt install -y \
 
 # Step 3: Secure MySQL installation
 print_status "Configuring MySQL..."
-sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';"
-sudo mysql -u root -p$MYSQL_ROOT_PASSWORD -e "DELETE FROM mysql.user WHERE User='';"
-sudo mysql -u root -p$MYSQL_ROOT_PASSWORD -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
-sudo mysql -u root -p$MYSQL_ROOT_PASSWORD -e "DROP DATABASE IF EXISTS test;"
-sudo mysql -u root -p$MYSQL_ROOT_PASSWORD -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
-sudo mysql -u root -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
+
+# First, try to connect without password (auth_socket) and set up authentication
+print_status "Setting up MySQL authentication..."
+sudo mysql << EOF
+-- Set root password and switch to native password authentication
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';
+
+-- Remove anonymous users
+DELETE FROM mysql.user WHERE User='';
+
+-- Remove remote root access
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+
+-- Remove test database
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+
+-- Reload privileges
+FLUSH PRIVILEGES;
+EOF
 
 # Step 4: Create database and user
 print_status "Creating database and user..."
-sudo mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS studentdb;"
-sudo mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS 'studentuser'@'localhost' IDENTIFIED BY '$MYSQL_APP_PASSWORD';"
-sudo mysql -u root -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON studentdb.* TO 'studentuser'@'localhost';"
-sudo mysql -u root -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
+mysql -u root -p$MYSQL_ROOT_PASSWORD << EOF
+-- Create database
+CREATE DATABASE IF NOT EXISTS studentdb;
+
+-- Create user
+CREATE USER IF NOT EXISTS 'studentuser'@'localhost' IDENTIFIED BY '$MYSQL_APP_PASSWORD';
+
+-- Grant privileges
+GRANT ALL PRIVILEGES ON studentdb.* TO 'studentuser'@'localhost';
+
+-- Reload privileges
+FLUSH PRIVILEGES;
+EOF
 
 # Step 5: Clone repository
 print_status "Cloning repository..."
