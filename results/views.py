@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.contrib import messages
 from django.db.models import Q
-from core.models import Course, Department
+from accounts.models import Course, Department
 from .models import Result, GPACalculation
 import csv
 from io import TextIOWrapper

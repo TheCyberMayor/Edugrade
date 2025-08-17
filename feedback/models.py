@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from core.models import Course
+from accounts.models import Course
 from django.core.validators import MinValueValidator, MaxValueValidator
 import re
 
