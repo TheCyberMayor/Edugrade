@@ -1,10 +1,10 @@
 import os
 from pathlib import Path
-from decouple import Config, RepositoryEnv
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 env_path = BASE_DIR / '.env'
-config = Config(RepositoryEnv(str(env_path))) if env_path.exists() else Config()
+config = Config(env_path) if env_path.exists() else Config()
 
 from .settings import *
 
