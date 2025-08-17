@@ -28,7 +28,7 @@ class Course(models.Model):
     code = models.CharField(max_length=10, unique=True)
     unit = models.IntegerField()
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    lecturers = models.ManyToManyField(User, limit_choices_to={'role': 'lecturer'}, blank=True)
+    lecturers = models.ManyToManyField(User, limit_choices_to={'role': 'lecturer'}, blank=True, related_name="accounts_courses")
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
