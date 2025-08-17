@@ -78,7 +78,7 @@ A comprehensive Django web application for managing student results, course feed
 
 
 ### User Model (Extended)
-```python
+\`\`\`python
 class User(AbstractUser):
     ROLE_CHOICES = [
         ('admin', 'Admin'),
